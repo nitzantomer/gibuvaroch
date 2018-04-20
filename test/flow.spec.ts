@@ -9,13 +9,19 @@ import * as fs from "fs";
 import { NewQueryEvent } from "../src/interfaces";
 import { getPublicKey, getPrivateKey, queryToBuffer } from "../src/utils";
 import * as crypto from "crypto";
-import { SearchAdapterInterface } from "../src/search-adapter";
+import { SearchAdapterInterface, SearchResult } from "../src/search-adapter";
 
 const { expect } = chai;
 
 chai.use(sinonChai);
 
 const CONTRACT_ADDRESS = "some-address";
+
+const buyerPublicKey: crypto.RsaPublicKey = getPublicKey(`${__dirname}/../../temp-keys/buyer/key.pub.pem`);
+const buyerPrivateKey: crypto.RsaPublicKey = getPublicKey(`${__dirname}/../../temp-keys/buyer/key`);
+
+const sellerPublicKey: crypto.RsaPublicKey = getPublicKey(`${__dirname}/../../temp-keys/seller/key.pub.pem`);
+const sellerPrivateKey: crypto.RsaPrivateKey = getPrivateKey(`${__dirname}/../../temp-keys/seller/key`);
 
 describe("General flow", () => {
     describe("Client", () => {
@@ -46,9 +52,9 @@ describe("General flow", () => {
 
             it("submits a request with encrypted data and public key", () => {
                 client = new Client({ adapter });
-                client.queryData("Israel independence day 2018");
+                client.queryRequest("Israel independence day 2018");
 
-                expect(adapter.queryData).to.be.called;
+                expect(adapter.queryRequest).to.be.called;
             });
         });
     });
@@ -77,17 +83,34 @@ describe("General flow", () => {
         });
 
         describe("regular flow", () => {
-            const buyerPublicKey: crypto.RsaPublicKey = getPublicKey(`${__dirname}/../../temp-keys/buyer/key.pub.pem`);
-            const sellerPublicKey: crypto.RsaPublicKey = getPublicKey(`${__dirname}/../../temp-keys/seller/key.pub.pem`);
-
-            it("successfully decrypts query", () => {
+            it("successfully processes query", () => {
                 const event: NewQueryEvent = {
                     buyerPublicKey: buyerPublicKey,
                     encryptedQuery: crypto.publicEncrypt(sellerPublicKey, queryToBuffer("Israel independence day 2018"))
                 };
 
+                const searchResults: SearchResult[] = [
+                    {
+                        id: 0,
+                        description: "State holidays in Israel, 2018",
+                        score: 10
+                    },
+                    {
+                        id: 1,
+                        description: "Declaration of independence, Israel, 1948",
+                        score: 5
+                    }
+                ];
+                (<sinon.SinonStub>searchAdapter.search).returns(searchResults);
+
                 server.processNewQueryEvent(event);
                 expect(searchAdapter.search).to.be.calledWith("Israel independence day 2018");
+
+                const queryResponse = (<sinon.SinonSpy>contractAdapter.queryResponse).getCall(0);
+                expect(queryResponse).not.to.be.null;
+
+                const decryptedSearchResults = JSON.parse(crypto.privateDecrypt(buyerPrivateKey, queryResponse.args[0]).toString());
+                expect(decryptedSearchResults).to.be.eql({ results: searchResults });
             });
         });
     });

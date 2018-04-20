@@ -2,7 +2,8 @@ import * as fs from "fs";
 import { RsaPublicKey } from "crypto";
 
 export interface ContractAdapterInterface {
-    queryData(query: Buffer, buyerPublicKey: RsaPublicKey): void;
+    queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): void;
+    queryResponse(encryptedQueryResults: Buffer): void;
     getSellerPublicKey(): RsaPublicKey;
 }
 export default class ContractAdapter implements ContractAdapterInterface {
@@ -17,7 +18,11 @@ export default class ContractAdapter implements ContractAdapterInterface {
         throw new Error(`Not implemented`);
     }
 
-    queryData(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey) {
+    queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey) {
+        throw new Error(`Not implemented`);
+    }
+
+    queryResponse(encryptedQueryResults: Buffer) {
         throw new Error(`Not implemented`);
     }
 }

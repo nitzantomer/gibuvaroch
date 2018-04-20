@@ -22,10 +22,10 @@ export default class Client {
         return getPublicKey(`${__dirname}/../../temp-keys/buyer/key.pub.pem`);
     }
 
-    queryData(query: string) {
+    queryRequest(query: string) {
         const queryAsBuffer = queryToBuffer(query);
         const encryptedQuery = crypto.publicEncrypt(this.getSellerPublicKey(), queryAsBuffer);
 
-        this.adapter.queryData(encryptedQuery, this.getBuyerPublicKey());
+        this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
     }
 }
