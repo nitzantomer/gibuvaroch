@@ -14,7 +14,9 @@
     "build": "yarn run build-ts && yarn run tslint",
     "build-ts": "tsc",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "test": "tsc -p tsconfig.test.json && NODE_ENV=test ./node_modules/.bin/mocha distTest/**/*.spec.js"
+    "test": "tsc -p tsconfig.test.json && NODE_ENV=test ./node_modules/.bin/mocha distTest/test/flow.spec.js",
+    "contract-test": "tsc -p tsconfig.test.json && NODE_ENV=test ./node_modules/.bin/truffle test ./test/contract.spec.js",
+    "starrt-node": "./node_modules/.bin/ganache-cli -p 8545"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
@@ -31,8 +33,11 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-subset": "^1.6.0",
+    "ganache-core": "^2.1.0",
+    "ganache-cli": "^6.1.0",
     "mocha": "^5.1.1",
     "sinon-chai": "^3.0.0",
+    "truffle": "^4.1.7",
     "ts-sinon": "^1.0.12",
     "tslint": "^5.9.1",
     "typescript": "^2.7.1"
