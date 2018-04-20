@@ -31,7 +31,9 @@ export default class Client {
         this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
     }
 
-    processQueryResponseEvent(event: QueryResponseEvent) {
-        const { results } = JSON.parse(crypto.privateDecrypt(this.getBuyerPrivateKey(), event.encryptedResponse));
+    processQueryResponseEvent(event: QueryResponseEvent): SearchResult[] {
+        const { results } = JSON.parse(crypto.privateDecrypt(this.getBuyerPrivateKey(), event.encryptedResponse).toString());
+
+        return results;
     }
 }

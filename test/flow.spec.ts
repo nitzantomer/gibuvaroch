@@ -30,7 +30,7 @@ describe("General flow", () => {
 
         beforeEach(() => {
             adapter = stubInterface<ContractAdapter>();
-            (<sinon.SinonStub>adapter.getSellerPublicKey).returns(getPublicKey(`${__dirname}/../../temp-keys/buyer/key.pub.pem`));
+            (<sinon.SinonStub>adapter.getSellerPublicKey).returns(sellerPublicKey);
 
             client = new Client({ adapter });
         });
@@ -67,10 +67,10 @@ describe("General flow", () => {
                 ];
 
                 const event: QueryResponseEvent = {
-                    encryptedResponse: crypto.publicEncrypt(sellerPublicKey, resultsToBuffer(searchResults))
+                    encryptedResponse: crypto.publicEncrypt(buyerPublicKey, resultsToBuffer(searchResults))
                 };
 
-                client.processQueryResponseEvent(event);
+                expect(client.processQueryResponseEvent(event)).to.be.eql(searchResults);
             });
         });
     });
