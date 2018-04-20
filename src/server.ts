@@ -27,6 +27,6 @@ export default class Server {
         const searchResults = this.searchAdapter.search(query);
         const encryptedQueryResults = crypto.publicEncrypt(event.buyerPublicKey, resultsToBuffer(searchResults));
 
-        this.contractAdapter.queryResponse(encryptedQueryResults);
+        this.contractAdapter.queryResponse(event.requestId, encryptedQueryResults);
     }
 }

@@ -67,10 +67,12 @@ describe("General flow", () => {
                 ];
 
                 const event: QueryResponseEvent = {
+                    requestId: "test-request-id",
                     encryptedResponse: crypto.publicEncrypt(buyerPublicKey, resultsToBuffer(searchResults))
                 };
 
-                expect(client.processQueryResponseEvent(event)).to.be.eql(searchResults);
+                client.processQueryResponseEvent(event);
+                expect(client.getRequestResults("test-request-id")).to.be.eql(searchResults);
             });
         });
     });
@@ -101,6 +103,7 @@ describe("General flow", () => {
         describe("regular flow", () => {
             it("successfully processes query", () => {
                 const event: QueryRequestEvent = {
+                    requestId: "test-request-id",
                     buyerPublicKey: buyerPublicKey,
                     encryptedQuery: crypto.publicEncrypt(sellerPublicKey, queryToBuffer("Israel independence day 2018"))
                 };
@@ -125,7 +128,9 @@ describe("General flow", () => {
                 const queryResponse = (<sinon.SinonSpy>contractAdapter.queryResponse).getCall(0);
                 expect(queryResponse).not.to.be.null;
 
-                const decryptedSearchResults = JSON.parse(crypto.privateDecrypt(buyerPrivateKey, queryResponse.args[0]).toString());
+                expect(queryResponse.args[0]).to.be.eql("test-request-id");
+
+                const decryptedSearchResults = JSON.parse(crypto.privateDecrypt(buyerPrivateKey, queryResponse.args[1]).toString());
                 expect(decryptedSearchResults).to.be.eql({ results: searchResults });
             });
         });

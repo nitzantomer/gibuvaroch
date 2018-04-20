@@ -7,6 +7,7 @@ import { SearchResult } from "./search-adapter";
 
 export default class Client {
     adapter: ContractAdapterInterface;
+    requestResults = new Map<String, SearchResult[]>();
 
     constructor(input: { adapter: ContractAdapterInterface }) {
         this.adapter = input.adapter;
@@ -31,9 +32,16 @@ export default class Client {
         this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
     }
 
-    processQueryResponseEvent(event: QueryResponseEvent): SearchResult[] {
+    processQueryResponseEvent(event: QueryResponseEvent) {
         const { results } = JSON.parse(crypto.privateDecrypt(this.getBuyerPrivateKey(), event.encryptedResponse).toString());
+        this.storeRequestResults(event.requestId, results);
+    }
 
-        return results;
+    storeRequestResults(requestId: string, results: SearchResult[]) {
+        this.requestResults.set(requestId, results);
+    }
+
+    getRequestResults(requestId: string): SearchResult[] {
+        return this.requestResults.get(requestId);
     }
 }
