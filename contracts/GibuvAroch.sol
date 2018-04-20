@@ -35,6 +35,7 @@ contract GibuvAroch is Ownable {
 
 	function dataRequest(bytes32 reqId, uint index) public payable {
 		require(prices[reqId].exists);
+		require(prices[reqId].prices.length > index);
 		require(msg.value == prices[reqId].prices[index]);
 
 		emit LogDataRequest(reqId, index);
