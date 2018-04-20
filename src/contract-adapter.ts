@@ -1,7 +1,11 @@
-export interface ContractAdapterInterface {
-    queryData(query: Buffer, buyerPublicKey: Buffer): void;
-}
+import * as fs from "fs";
+import { RsaPublicKey } from "crypto";
 
+export interface ContractAdapterInterface {
+    queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): void;
+    queryResponse(encryptedQueryResults: Buffer): void;
+    getSellerPublicKey(): RsaPublicKey;
+}
 export default class ContractAdapter implements ContractAdapterInterface {
     address: string;
 
@@ -9,7 +13,16 @@ export default class ContractAdapter implements ContractAdapterInterface {
         this.address = input.address;
     }
 
-    queryData(encryptedQuery: Buffer, buyerPublicKey: Buffer) {
+    // TODO: replace with a real call
+    getSellerPublicKey(): RsaPublicKey {
+        throw new Error(`Not implemented`);
+    }
+
+    queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey) {
+        throw new Error(`Not implemented`);
+    }
+
+    queryResponse(encryptedQueryResults: Buffer) {
         throw new Error(`Not implemented`);
     }
 }
