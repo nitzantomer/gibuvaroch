@@ -2,6 +2,8 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import { ContractAdapterInterface } from "./contract-adapter";
 import { getPrivateKey, getPublicKey, queryToBuffer } from "./utils";
+import { QueryResponseEvent } from "./interfaces";
+import { SearchResult } from "./search-adapter";
 
 export default class Client {
     adapter: ContractAdapterInterface;
@@ -27,5 +29,9 @@ export default class Client {
         const encryptedQuery = crypto.publicEncrypt(this.getSellerPublicKey(), queryAsBuffer);
 
         this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
+    }
+
+    processQueryResponseEvent(event: QueryResponseEvent) {
+        const { results } = JSON.parse(crypto.privateDecrypt(this.getBuyerPrivateKey(), event.encryptedResponse));
     }
 }

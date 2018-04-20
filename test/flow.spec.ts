@@ -6,8 +6,8 @@ import { stubInterface } from "ts-sinon";
 import * as sinonChai from "sinon-chai";
 import * as shell from "shelljs";
 import * as fs from "fs";
-import { NewQueryEvent } from "../src/interfaces";
-import { getPublicKey, getPrivateKey, queryToBuffer } from "../src/utils";
+import { QueryRequestEvent, QueryResponseEvent } from "../src/interfaces";
+import { getPublicKey, getPrivateKey, queryToBuffer, resultsToBuffer } from "../src/utils";
 import * as crypto from "crypto";
 import { SearchAdapterInterface, SearchResult } from "../src/search-adapter";
 
@@ -56,6 +56,22 @@ describe("General flow", () => {
 
                 expect(adapter.queryRequest).to.be.called;
             });
+
+            it("successfully processes search results", () => {
+                const searchResults: SearchResult[] = [
+                    {
+                        id: 0,
+                        description: "State holidays in Israel 2018",
+                        score: 10
+                    }
+                ];
+
+                const event: QueryResponseEvent = {
+                    encryptedResponse: crypto.publicEncrypt(sellerPublicKey, resultsToBuffer(searchResults))
+                };
+
+                client.processQueryResponseEvent(event);
+            });
         });
     });
 
@@ -84,7 +100,7 @@ describe("General flow", () => {
 
         describe("regular flow", () => {
             it("successfully processes query", () => {
-                const event: NewQueryEvent = {
+                const event: QueryRequestEvent = {
                     buyerPublicKey: buyerPublicKey,
                     encryptedQuery: crypto.publicEncrypt(sellerPublicKey, queryToBuffer("Israel independence day 2018"))
                 };
@@ -103,7 +119,7 @@ describe("General flow", () => {
                 ];
                 (<sinon.SinonStub>searchAdapter.search).returns(searchResults);
 
-                server.processNewQueryEvent(event);
+                server.processQueryRequestEvent(event);
                 expect(searchAdapter.search).to.be.calledWith("Israel independence day 2018");
 
                 const queryResponse = (<sinon.SinonSpy>contractAdapter.queryResponse).getCall(0);
