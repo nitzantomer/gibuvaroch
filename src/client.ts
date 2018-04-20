@@ -1,28 +1,30 @@
 import * as crypto from "crypto";
-import ContractAdapter from "./contract-adapter";
+import * as fs from "fs";
+import { ContractAdapterInterface } from "./contract-adapter";
+import { getPrivateKey, getPublicKey, queryToBuffer } from "./utils";
 
 export default class Client {
-    adapter: ContractAdapter;
+    adapter: ContractAdapterInterface;
 
-    constructor(input: { adapter: ContractAdapter }) {
+    constructor(input: { adapter: ContractAdapterInterface }) {
         this.adapter = input.adapter;
     }
 
-    getSellerPublicKey(): Buffer {
-        return new Buffer("seller-public-key");
+    getSellerPublicKey(): crypto.RsaPublicKey {
+        return this.adapter.getSellerPublicKey();
     }
 
-    getBuyerPrivateKey(): Buffer {
-        return new Buffer("buyer-private-key");
+    getBuyerPrivateKey(): crypto.RsaPrivateKey {
+        return getPrivateKey(`${__dirname}/../../temp-keys/buyer/key`);
     }
 
-    getBuyerPublicKey(): Buffer {
-        return new Buffer("buyer-public-key");
+    getBuyerPublicKey(): crypto.RsaPublicKey {
+        return getPublicKey(`${__dirname}/../../temp-keys/buyer/key.pub.pem`);
     }
 
     queryData(query: string) {
-        const cipher = crypto.createCipher("aes192", this.getBuyerPrivateKey());
-        const encryptedQuery = cipher.update(JSON.stringify({query}), "utf8");
+        const queryAsBuffer = queryToBuffer(query);
+        const encryptedQuery = crypto.publicEncrypt(this.getSellerPublicKey(), queryAsBuffer);
 
         this.adapter.queryData(encryptedQuery, this.getBuyerPublicKey());
     }
