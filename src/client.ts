@@ -61,4 +61,8 @@ export default class Client {
         });
     }
 
+    dataRequest(requestId: string, index: number) {
+        const price = this.getSearchMetadata(requestId).prices[index];
+        this.adapter.dataRequest(requestId, index, price);
+    }
 }

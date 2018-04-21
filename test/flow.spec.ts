@@ -60,7 +60,7 @@ describe("General flow", () => {
             it("successfully processes search results", () => {
                 const results: SearchResult[] = [
                     {
-                        id: 0,
+                        id: "important-file",
                         description: "State holidays in Israel 2018",
                         score: 10
                     }
@@ -104,7 +104,7 @@ describe("General flow", () => {
         });
 
         describe("regular flow", () => {
-            it("successfully processes query", () => {
+            it("successfully processes query", async () => {
                 const event: QueryRequestEvent = {
                     requestId: "test-request-id",
                     buyerPublicKey: buyerPublicKey,
@@ -113,12 +113,12 @@ describe("General flow", () => {
 
                 const results: SearchResult[] = [
                     {
-                        id: 0,
+                        id: "result-1",
                         description: "State holidays in Israel, 2018",
                         score: 10
                     },
                     {
-                        id: 1,
+                        id: "result-2",
                         description: "Declaration of independence, Israel, 1948",
                         score: 5
                     }
@@ -128,18 +128,18 @@ describe("General flow", () => {
 
                 (<sinon.SinonStub>searchAdapter.search).returns({ results, prices });
 
-                server.processQueryRequestEvent(event);
-                expect(searchAdapter.search).to.be.calledWith("Israel independence day 2018");
+                await server.processQueryRequestEvent(event);
+                await expect(searchAdapter.search).to.be.calledWith("Israel independence day 2018");
 
                 const queryResponse = (<sinon.SinonSpy>contractAdapter.queryResponse).getCall(0);
-                expect(queryResponse).not.to.be.null;
+                await expect(queryResponse).not.to.be.null;
 
-                expect(queryResponse.args[0]).to.be.eql("test-request-id");
+                await expect(queryResponse.args[0]).to.be.eql("test-request-id");
 
-                expect(queryResponse.args[1]).to.be.eql(prices);
+                await expect(queryResponse.args[1]).to.be.eql(prices);
 
                 const decryptedSearchResults = JSON.parse(crypto.privateDecrypt(buyerPrivateKey, queryResponse.args[2]).toString());
-                expect(decryptedSearchResults).to.be.eql({ results: results });
+                await expect(decryptedSearchResults).to.be.eql({ results: results });
             });
         });
     });

@@ -11,3 +11,8 @@ export interface QueryResponseEvent {
     prices: number[];
     encryptedResponse: Buffer;
 }
+
+export interface DataRequestEvent {
+    requestId: string;
+    index: number;
+}
