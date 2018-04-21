@@ -170,4 +170,6 @@ class Main extends React.Component<{}, MainState> {
 	}
 }
 
-ReactDOM.render(<Main />, document.getElementById("reactroot"));
+export function init() {
+	ReactDOM.render(<Main/>, document.getElementById("reactroot"));
+}
