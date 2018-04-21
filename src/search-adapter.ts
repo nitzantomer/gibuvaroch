@@ -58,16 +58,21 @@ export default class SearchAdapter implements SearchAdapterInterface {
         for (const document of getDecryptedDocuments()) {
             let score = 0;
 
+            const matches: string[] = [];
+
             for (const term of query.split(/\W/)) {
-                if (_.includes(document.contents, term)) {
-                    score += 1;
-                }
+                document.contents.split("\n").forEach(line => {
+                    if (_.includes(line, term)) {
+                        score += 1;
+                        matches.push(line);
+                    }
+                });
             }
 
             if (score > 0) {
                 results.push({
                     id: document.id,
-                    description: document.contents.split("\n")[0].slice(0, 30),
+                    description: matches[0].slice(0, 27) + "...",
                     score
                 });
 
