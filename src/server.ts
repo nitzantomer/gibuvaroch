@@ -30,6 +30,9 @@ export default class Server {
         console.log(`Received query request:`, query);
 
         const searchResults = this.searchAdapter.search(query);
+
+        console.log(`Retrived query results:`, searchResults);
+
         const encryptedQueryResults = crypto.publicEncrypt(event.buyerPublicKey, resultsToBuffer(searchResults));
 
         this.contractAdapter.queryResponse(event.requestId, encryptedQueryResults);
@@ -39,8 +42,6 @@ export default class Server {
         const queryRequestEvents = await this.contractAdapter.getQueryRequestEvents(0);
 
         queryRequestEvents.forEach((queryRequestEvent: any) => {
-            console.log(queryRequestEvent);
-
             const { reqId, buyerPublicKey, encryptedQuery} = queryRequestEvent.returnValues;
 
             this.processQueryRequestEvent({

@@ -1,6 +1,7 @@
 import Client from "./client";
 import Server from "./server";
 import ContractAdapter from "./contract-adapter";
+import SearchAdapter from "./search-adapter";
 
 const MODE = process.argv[2];
 const { CONTRACT_ADDRESS, ETH_PRIVATE_KEY } = process.env;
@@ -15,7 +16,7 @@ if (MODE == "--client") {
 
 } else if (MODE == "--server") {
     const server = new Server({
-        searchAdapter: undefined,
+        searchAdapter: new SearchAdapter(),
         contractAdapter: new ContractAdapter({ address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY })
     });
 
