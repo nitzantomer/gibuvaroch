@@ -8,10 +8,20 @@
 	</head>
 	<body>
 		<div id="reactroot"></div>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.21.3/system-production.js"></script>
+		<!--script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script-->
+		<!--script src="scripts/lib/web3.min.js"></script-->
+		<!--script data-main="scripts/bin/index"  src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script-->
+		<!--script-- src="https://cdn.jsdelivr.net/npm/web3@1.0.0-beta.34/src/index.min.js"></script-->
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.21.3/system.js"></script>
 		<script>
 			SystemJS.config({
 				baseURL: "scripts/bin",
+				packages: {
+					".": {
+						defaultJSExtensions: true
+					}
+				},
 				map: {
 					react: "https://unpkg.com/react@16/umd/react.production.min.js",
 					"react-dom": "https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"
@@ -20,5 +30,6 @@
 
 			SystemJS.import("index.js");
 		</script>
+
 	</body>
 </html>

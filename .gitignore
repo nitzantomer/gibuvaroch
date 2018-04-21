@@ -6,5 +6,6 @@ yarn.lock
 temp-keys
 build
 webclient/**/bin
+web3proxy/**/bin
 package-lock.json
 encrypted-documents
