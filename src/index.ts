@@ -41,7 +41,7 @@ if (MODE == "--client") {
         contractAdapter: new ContractAdapter({ address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY })
     });
 
-    (async () => {
+    setInterval(async () => {
         await server.listenToEvents();
-    })();
+    }, 5000);
 }
