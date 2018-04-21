@@ -24,10 +24,10 @@ if (MODE == "--client") {
 
         if (step == "2") { // queryResponse
             const response = client.getSearchMetadata(first);
-            if (response) {
+            if (!response) {
                 console.log(`haven't received queryResponse for ${first}`);
             } else {
-                console.log(`got queryResponse for ${first}: ${response}`);
+                console.log(`got queryResponse for ${first}:`, response);
             }
         }
 
@@ -39,10 +39,10 @@ if (MODE == "--client") {
 
         if (step == "4") { // dataResponse
             const response = client.getSearchDocument(first);
-            if (response) {
+            if (!response) {
                 console.log(`haven't received dataResponse for ${first}`);
             } else {
-                console.log(`got dataResponse for ${first}: ${response}`);
+                console.log(`got dataResponse for ${first}:`, response);
             }
         }
         return "done";

@@ -92,7 +92,7 @@ export default class Server {
         let newLastBlock = lastBlock;
         const  queryRequestEvents = await this.contractAdapter.getEvents("LogQueryRequest", lastBlock + 1);
 
-        Promise.all(
+		await Promise.all(
             queryRequestEvents.map(async queryRequestEvent => {
                 const { reqId, buyerPublicKey, encryptedQuery } = queryRequestEvent.returnValues;
                 newLastBlock = Math.max(newLastBlock, queryRequestEvent.blockNumber);
@@ -105,7 +105,7 @@ export default class Server {
         );
 
         const dataRequestEvents = await this.contractAdapter.getEvents("LogDataRequest", lastBlock + 1 );
-        Promise.all(
+        await Promise.all(
             dataRequestEvents.map(dataRequestEvent => {
                 const { reqId, index} = dataRequestEvent.returnValues;
                 newLastBlock = Math.max(newLastBlock, dataRequestEvent.blockNumber);

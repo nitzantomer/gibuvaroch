@@ -65,10 +65,9 @@ export default class Client {
 
     async listenToEvents() {
         const queryResponseEvents = await this.adapter.getEvents("LogQueryResponse", 0);
-        Promise.all(
+        await Promise.all(
             queryResponseEvents.map(queryResponseEvent => {
                 const { reqId, dataPrices, encryptedQueryResults } = queryResponseEvent.returnValues;
-
                 return this.processQueryResponseEvent({
                     requestId: reqId,
                     prices: dataPrices,
@@ -78,7 +77,7 @@ export default class Client {
         );
 
         const dataResponseEvents = await this.adapter.getEvents("LogDataResponse", 0);
-        Promise.all(
+        await Promise.all(
             dataResponseEvents.map(dataResponseEvent => {
                 const { reqId, encryptedData } = dataResponseEvent.returnValues;
 
