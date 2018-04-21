@@ -1,9 +1,8 @@
 import * as crypto from "crypto";
-import * as fs from "fs";
 import { ContractAdapterInterface } from "./contract-adapter";
 import { getPrivateKey, getPublicKey, queryToBuffer } from "./utils";
 import { QueryResponseEvent, DataResponseEvent } from "./interfaces";
-import { SearchResult, SearchMetadata, SearchDocument } from "./search-adapter";
+import { SearchMetadata, SearchDocument } from "./search-adapter";
 const { NODE_ENV } = process.env;
 const KEY_PATH = NODE_ENV === "test" ? `${__dirname}/../..` : `${__dirname}/../`;
 

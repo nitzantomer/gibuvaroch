@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import { RsaPublicKey } from "crypto";
 const Web3 = require("web3");
-import { getPublicKey } from "./utils";
 
 export interface ContractAdapterInterface {
     queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): Promise<string>;
@@ -19,7 +18,8 @@ export default class ContractAdapter implements ContractAdapterInterface {
 
     constructor(input: { address: string, ethPrivateKey: string }) {
         this.address = input.address;
-        this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+		// this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        this.web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/"));
 
         const jsonInterface = JSON.parse(fs.readFileSync(`${__dirname}/../build/contracts/GibuvAroch.json`).toString()).abi;
         this.contract = new this.web3.eth.Contract(jsonInterface, this.address);
@@ -28,7 +28,14 @@ export default class ContractAdapter implements ContractAdapterInterface {
     }
 
     async getSellerPublicKey(): Promise<RsaPublicKey> {
-        const sellerPublicKey = await this.contract.methods.publicKey().call();
+		function parseKey(input: string): string {
+			return input
+				.replace(/ RSA PUBLIC KEY/g, "-RSA-PUBLIC-KEY")
+				.replace(/ /g, "\n")
+				.replace(/-RSA-PUBLIC-KEY/g, " RSA PUBLIC KEY");
+		}
+
+		const sellerPublicKey = parseKey(await this.contract.methods.getPublicKey().call())
 
         console.log(`Retrieved seller public key`);
         console.log(sellerPublicKey);
@@ -39,7 +46,7 @@ export default class ContractAdapter implements ContractAdapterInterface {
     async queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey): Promise<string> {
         const requestId = Web3.utils.randomHex(32);
 
-        this.contract.methods.queryRequest(requestId, buyerPublicKey.key, encryptedQuery.toString("hex")).send({
+        await this.contract.methods.queryRequest(requestId, buyerPublicKey.key, encryptedQuery.toString("hex")).send({
             from: this.account.address,
             gas: 10000000000
         });
@@ -48,7 +55,7 @@ export default class ContractAdapter implements ContractAdapterInterface {
     }
 
     async queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer) {
-        this.contract.methods.queryResponse(requestId, prices, encryptedQueryResults.toString("hex")).send({
+        await this.contract.methods.queryResponse(requestId, prices, encryptedQueryResults.toString("hex")).send({
             from: this.account.address,
             gas: 10000000000
         });
