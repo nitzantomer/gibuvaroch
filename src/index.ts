@@ -57,4 +57,8 @@ if (MODE == "--client") {
     setInterval(async () => {
         await server.listenToEvents();
     }, 5000);
+} else if (MODE == "--search") {
+    console.log(process.argv.slice(3).join(" "));
+    const results = new SearchAdapter().search(process.argv.slice(3).join(" "));
+    console.log(results);
 }
