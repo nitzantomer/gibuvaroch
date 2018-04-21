@@ -12,7 +12,7 @@
   "license": "MIT",
   "scripts": {
     "build": "yarn run build-ts && yarn run tslint",
-    "build-ts": "tsc",
+    "build-ts": "tsc && tsc -p webclient/scripts/tsconfig.json",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "test": "tsc -p tsconfig.test.json && NODE_ENV=test ./node_modules/.bin/mocha distTest/test/flow.spec.js --exit ",
     "contract-test": "tsc -p tsconfig.test.json && NODE_ENV=test ./node_modules/.bin/truffle test ./test/contract.spec.js",
