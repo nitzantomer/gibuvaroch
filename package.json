@@ -20,6 +20,7 @@
     "contract-compile": "./node_modules/.bin/truffle compile"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",

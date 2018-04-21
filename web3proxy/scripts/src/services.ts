@@ -21,6 +21,8 @@ type KeyPair = {
 
 type CreateSessionRequest = ExpressRequest & {
 	body: {
+		node: string;
+
 		contract_abi: any;
 		contract_address: string;
 
@@ -30,7 +32,7 @@ type CreateSessionRequest = ExpressRequest & {
 };
 async function createSession(req: CreateSessionRequest, res: ExpressResponse) {
 	keyPair = req.body.encryption_keys;
-	web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+	web3 = new Web3(new Web3.providers.HttpProvider(req.body.node));
 
 	const abi = typeof req.body.contract_abi === "string" ? JSON.parse(req.body.contract_abi) : req.body.contract_abi;
 	contract = new web3.eth.Contract(abi, req.body.contract_address);

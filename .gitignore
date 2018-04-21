@@ -7,4 +7,5 @@ temp-keys
 build
 webclient/**/bin
 web3proxy/**/bin
-package-lock.jsonencrypted-documents
+package-lock.json
+encrypted-documents
