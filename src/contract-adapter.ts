@@ -6,10 +6,27 @@ export interface ContractAdapterInterface {
     queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): Promise<string>;
     queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer): void;
     getSellerPublicKey(): Promise<RsaPublicKey>;
-    getEvents(eventType: string, fromBlock: number): Promise<any>;
+    getEvents(eventType: string, fromBlock: number): Promise<ContractEvent[]>;
     dataRequest(requestId: string, index: number, price: number): void;
     dataResponse(requestId: string, encryptedData: Buffer): void;
 }
+
+export interface ContractEvent {
+    returnValues: any;
+    raw: {
+        data: string;
+        topics: string[];
+    };
+    event: string;
+    signature: string;
+    logIndex: number;
+    transactionIndex: number;
+    transactionHash: string;
+    blockHash: string;
+    blockNumber: number;
+    address: string;
+}
+
 export default class ContractAdapter implements ContractAdapterInterface {
     address: string;
     web3: any;
@@ -18,8 +35,6 @@ export default class ContractAdapter implements ContractAdapterInterface {
 
     constructor(input: { network: string, address: string, ethPrivateKey: string }) {
         this.address = input.address;
-		// this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-		// this.web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/"));
 		this.web3 = new Web3(new Web3.providers.HttpProvider(input.network));
 
         const jsonInterface = JSON.parse(fs.readFileSync(`${__dirname}/../build/contracts/GibuvAroch.json`).toString()).abi;
@@ -63,7 +78,7 @@ export default class ContractAdapter implements ContractAdapterInterface {
         });
     }
 
-    async getEvents(eventType: string, fromBlock: number): Promise<any> {
+    async getEvents(eventType: string, fromBlock: number): Promise<ContractEvent[]> {
         return this.contract.getPastEvents(eventType, { fromBlock, toBlock: "latest" });
     }
 

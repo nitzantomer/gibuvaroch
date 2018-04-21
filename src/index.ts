@@ -10,29 +10,41 @@ if (MODE == "--client") {
     const client = new Client({ adapter: new ContractAdapter({ network: NETWORK, address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY }) });
 
     (async () => {
-        const id = process.argv[3];
-        const index = Number(process.argv[4]);
+        const step = process.argv[3];
+        const first = process.argv[4];
+        const second = Number(process.argv[5]); // for step 3
 
         await client.listenToEvents();
 
-        console.log("SEARCH METADATA");
-        for (const id of client.searchMetadata.keys()) {
-            console.log(id);
-            console.log(client.getSearchMetadata(id));
+        if (step == "1") {  // queryRequest
+            const requestId = await client.queryRequest(first || "some query");
+            console.log(`RequestId: ${requestId} for query: ${first}`);
         }
 
-        console.log("SEARCH DOCUMENTS");
-        for (const id of client.documents.keys()) {
-            console.log(id);
-            console.log(client.getSearchDocument(id));
+        if (step == "2") { // queryResponse
+            const response = client.getSearchMetadata(first);
+            if (response) {
+                console.log(`haven't received queryResponse for ${first}`);
+            } else {
+                console.log(`got queryResponse for ${first}: ${response}`);
+            }
         }
 
-        if (!id && !index) {
-            const requestId = await client.queryRequest("some query");
-            console.log(`RequestId: ${requestId}`);
-        } else {
-            await client.dataRequest(id, index);
+        if (step == "3") { // dataRequest
+            // first is reqId, second is index
+            await client.dataRequest(first, second);
+            console.log(`RequestId: ${first} for index: ${second}`);
         }
+
+        if (step == "4") { // dataResponse
+            const response = client.getSearchDocument(first);
+            if (response) {
+                console.log(`haven't received dataResponse for ${first}`);
+            } else {
+                console.log(`got dataResponse for ${first}: ${response}`);
+            }
+        }
+        return "done";
     })().then(console.log, console.error);
 
 } else if (MODE == "--server") {
