@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>GibuvAroch</title>
+
+		<link rel="stylesheet" href="styles/bin/index.css" />
+	</head>
+	<body>
+		<div id="reactroot"></div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.21.3/system-production.js"></script>
+		<script>
+			SystemJS.config({
+				baseURL: "scripts/bin",
+				map: {
+					react: "https://unpkg.com/react@16/umd/react.production.min.js",
+					"react-dom": "https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"
+				}
+			});
+
+			SystemJS.import("index.js");
+		</script>
+	</body>
+</html>

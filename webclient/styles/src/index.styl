@@ -1,0 +1,58 @@
+*
+	box-sizing: border-box
+	font-family: "Nunito", sans-serif
+
+html, body, #reactroot, #main
+	width: 100%
+	height: 100%
+	padding: 0px
+	margin 0px
+
+#main
+	padding: 20px 40px
+
+	#searchbox
+		display: flex
+
+		transition-property: width, height
+		transition-duration: 20s
+		transition-delay: 2s
+
+		img
+			opacity: 0.6
+
+		input
+			outline: none
+
+		input::placeholder
+			opacity: 0.6
+
+	#searchbox.big
+		width: 100%
+		height: 100%
+		padding: 50px 100px
+		align-items: center
+		justify-content: center
+
+		img
+			height: 130px
+			padding-right: 20px
+
+		input
+			width: 100%
+			font-size: 20px
+			padding: 5px 10px
+			margin-bottom: 45px
+
+	#searchbox.small
+		align-items: center
+		justify-content: center
+
+		img
+			height: 70px
+			padding-right: 10px
+
+		input
+			flex-grow: 1
+			padding: 5px 10px
+			margin-bottom: 25px

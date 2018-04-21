@@ -5,3 +5,4 @@ distTest
 yarn.lock
 temp-keys
 build
+webclient/**/bin
