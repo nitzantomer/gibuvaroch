@@ -12,6 +12,7 @@ export default class Server {
     contractAdapter: ContractAdapterInterface;
     searchAdapter: SearchAdapterInterface;
     storage: any;
+    lastBlock: number;
 
     constructor(input: { contractAdapter: ContractAdapterInterface, searchAdapter: SearchAdapterInterface }) {
         this.contractAdapter = input.contractAdapter;
@@ -45,6 +46,13 @@ export default class Server {
         return metadata;
     }
 
+    async getLastBlock(): Promise<number> {
+        return parseInt(await this.storage.get("lastBlock") || "0");
+    }
+    async setLastBlock(block: number) {
+         await this.storage.set("lastBlock", block);
+    }
+
     async processQueryRequestEvent(event: QueryRequestEvent) {
         const { query } = JSON.parse(crypto.privateDecrypt(this.getSellerPrivateKey(), event.encryptedQuery).toString());
 
@@ -57,7 +65,7 @@ export default class Server {
         const metadata = this.searchAdapter.search(query);
         const { results, prices } = metadata;
 
-        console.log(`Retrived query results:`, results, `with prices:`, prices);
+        console.log(`Retrived query results:`, results, `with prices:`, prices, `for:`, event.requestId);
         await this.saveSearchMetadata(requestId, metadata);
 
         const encryptedQueryResults = crypto.publicEncrypt(buyerPublicKey, resultsToBuffer(results));
@@ -74,32 +82,41 @@ export default class Server {
         const document = this.searchAdapter.getDocument(documentId);
 
         const data = crypto.publicEncrypt(buyerPublicKey, new Buffer(JSON.stringify(document)));
+        console.log(`Retrived data:`, data, `for:`, event.requestId);
 
         this.contractAdapter.dataResponse(requestId, data);
     }
 
     async listenToEvents() {
-        const queryRequestEvents = await this.contractAdapter.getEvents("LogQueryRequest", 0);
+        const lastBlock = await this.getLastBlock();
+        let newLastBlock = lastBlock;
+        const queryRequestEvents = await this.contractAdapter.getEvents("LogQueryRequest", lastBlock + 1 );
 
-        queryRequestEvents.forEach(async (queryRequestEvent: any) => {
-            const { reqId, buyerPublicKey, encryptedQuery} = queryRequestEvent.returnValues;
+        Promise.all(
+            queryRequestEvents.map(async queryRequestEvent => {
+                const { reqId, buyerPublicKey, encryptedQuery } = queryRequestEvent.returnValues;
+                newLastBlock = Math.max(newLastBlock, queryRequestEvent.blockNumber);
+                return await this.processQueryRequestEvent({
+                    requestId: reqId,
+                    buyerPublicKey,
+                    encryptedQuery: new Buffer(encryptedQuery, "hex")
+                });
+            })
+        );
 
-            await this.processQueryRequestEvent({
-                requestId: reqId,
-                buyerPublicKey,
-                encryptedQuery: new Buffer(encryptedQuery, "hex")
-            });
-        });
+        const dataRequestEvents = await this.contractAdapter.getEvents("LogDataRequest", lastBlock + 1 );
 
-        const dataRequestEvents = await this.contractAdapter.getEvents("LogDataRequest", 0);
+        Promise.all(
+            dataRequestEvents.map(dataRequestEvent => {
+                const { reqId, index} = dataRequestEvent.returnValues;
+                newLastBlock = Math.max(newLastBlock, dataRequestEvent.blockNumber);
+                return this.processDataRequestEvent({
+                    requestId: reqId,
+                    index
+                });
+            })
+        );
 
-        dataRequestEvents.forEach((dataRequestEvent: any) => {
-            const { reqId, index} = dataRequestEvent.returnValues;
-
-            this.processDataRequestEvent({
-                requestId: reqId,
-                index
-            });
-        });
+        this.setLastBlock(newLastBlock);
     }
 }
