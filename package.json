@@ -16,7 +16,8 @@
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "test": "tsc -p tsconfig.test.json && NODE_ENV=test ./node_modules/.bin/mocha distTest/test/flow.spec.js",
     "contract-test": "tsc -p tsconfig.test.json && NODE_ENV=test ./node_modules/.bin/truffle test ./test/contract.spec.js",
-    "starrt-node": "./node_modules/.bin/ganache-cli -p 8545"
+    "start-node": "./node_modules/.bin/ganache-cli -p 8545 -l 300000000000000 -e 500000",
+    "contract-compile": "./node_modules/.bin/truffle compile"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
