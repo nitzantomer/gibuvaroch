@@ -4,10 +4,10 @@ import ContractAdapter from "./contract-adapter";
 import SearchAdapter from "./search-adapter";
 
 const MODE = process.argv[2];
-const { REDIS_URL, CONTRACT_ADDRESS, ETH_PRIVATE_KEY, REQUEST_ID } = process.env;
+const { REDIS_URL, CONTRACT_ADDRESS, ETH_PRIVATE_KEY, REQUEST_ID, NETWORK } = process.env;
 
 if (MODE == "--client") {
-    const client = new Client({ adapter: new ContractAdapter({ address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY }) });
+    const client = new Client({ adapter: new ContractAdapter({ network: NETWORK, address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY }) });
 
     (async () => {
         const id = process.argv[3];
@@ -38,7 +38,7 @@ if (MODE == "--client") {
 } else if (MODE == "--server") {
     const server = new Server({
         searchAdapter: new SearchAdapter(),
-        contractAdapter: new ContractAdapter({ address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY })
+        contractAdapter: new ContractAdapter({ network: NETWORK, address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY })
     });
 
     setInterval(async () => {

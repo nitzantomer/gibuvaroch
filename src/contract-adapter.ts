@@ -16,10 +16,11 @@ export default class ContractAdapter implements ContractAdapterInterface {
     contract: any;
     account: any;
 
-    constructor(input: { address: string, ethPrivateKey: string }) {
+    constructor(input: { network: string, address: string, ethPrivateKey: string }) {
         this.address = input.address;
 		// this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-        this.web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/"));
+		// this.web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/"));
+		this.web3 = new Web3(new Web3.providers.HttpProvider(input.network));
 
         const jsonInterface = JSON.parse(fs.readFileSync(`${__dirname}/../build/contracts/GibuvAroch.json`).toString()).abi;
         this.contract = new this.web3.eth.Contract(jsonInterface, this.address);
@@ -34,6 +35,7 @@ export default class ContractAdapter implements ContractAdapterInterface {
 				.replace(/ /g, "\n")
 				.replace(/-RSA-PUBLIC-KEY/g, " RSA PUBLIC KEY");
 		}
+		console.log(await this.contract.methods.getPublicKey());
 
 		const sellerPublicKey = parseKey(await this.contract.methods.getPublicKey().call())
 

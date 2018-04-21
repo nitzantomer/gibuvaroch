@@ -29,6 +29,7 @@ export default class Client {
 
     async queryRequest(query: string): Promise<string> {
         const queryAsBuffer = queryToBuffer(query);
+
         const encryptedQuery = crypto.publicEncrypt(await this.getSellerPublicKey(), queryAsBuffer);
 
         return this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
