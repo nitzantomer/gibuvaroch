@@ -122,5 +122,5 @@ initView(search, purchase);
 initClient("http://localhost:4321", "http://54.173.39.87", () => ({
 	encryptionPrivateKey: ENCRYPTION_PRIVATE_KEY,
 	encryptionPublicKey: ENCRYPTION_PUBLIC_KEY,
-	ethereumPrivateKey: "0xc6c699899a4b4661707c08b2e6b8118bc4a61abaddf74773dfc198e8b2110695"
+	ethereumPrivateKey: "0x0787adf5fd751ce74f371b22a36ad082f1ddfec96e9cd13e257c67e29c3c6a22"
 })).then(c => client = c);

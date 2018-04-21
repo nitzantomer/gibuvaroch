@@ -19,10 +19,6 @@ ol, ul, li
 	#searchbox
 		display: flex
 
-		transition-property: width, height
-		transition-duration: 20s
-		transition-delay: 2s
-
 		img
 			opacity: 0.6
 
@@ -43,11 +39,17 @@ ol, ul, li
 			height: 130px
 			padding-right: 20px
 
-		input
+		.wrapper
 			width: 100%
-			font-size: 20px
-			padding: 5px 10px
-			margin-bottom: 45px
+
+			input
+				width: 100%
+				font-size: 20px
+				padding: 5px 10px
+				margin-bottom: 45px
+
+			#loading
+				display: none
 
 	#searchbox.small
 		align-items: center
@@ -57,10 +59,34 @@ ol, ul, li
 			height: 70px
 			padding-right: 10px
 
-		input
+		.wrapper
 			flex-grow: 1
-			padding: 5px 10px
-			margin-bottom: 25px
+			position: relative
+			overflow-x: hidden
+
+			input
+				width: 100%
+				padding: 5px 10px
+				margin-bottom: 25px
+
+			#loading.on
+				bottom: 18px
+				left: 0px
+				height: 4px
+				width: 100%
+				display: block
+				position: absolute
+				background-color: #0b97c4
+
+				animation-duration: 5s
+				animation-name: slidein
+				animation-direction: alternate
+				animation-iteration-count: infinite
+
+	.noresults
+		padding: 50px
+		font-size: 20px
+		text-align: center
 
 	#results
 		padding: 20px
@@ -69,13 +95,36 @@ ol, ul, li
 			margin-bottom: 20px
 
 			.header
+				clear: both
+				overflow: auto
 				font-size: 16px
 				margin-bottom: 6px
 				border-bottom: 1px solid #8e908c
 
-				.price
-					margin-left: 5px
-					font-size: 14px
+				.title
+					float: left
+					font-weight: bold
 
-					.wei
-						margin-left: 3px
+				.buy
+					float: right
+
+					a
+						color: #ca1e7a
+						margin-right: 5px
+						text-decoration: none
+
+					a:hover
+						color: #0b97c4
+
+					.price
+						font-size: 13px
+
+@keyframes slidein {
+	from {
+		left: -100%
+	}
+
+	to {
+		left: 100%
+	}
+}

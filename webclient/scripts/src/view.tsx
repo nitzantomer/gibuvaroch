@@ -91,6 +91,7 @@ const RESULTS_MOCK: SearchResult[] = [
 
 type SearchBoxProps = {
 	className: string;
+	isLoading?: boolean;
 	onQuery: (query: string) => void;
 };
 const SearchBox = (props: SearchBoxProps) => {
@@ -105,7 +106,10 @@ const SearchBox = (props: SearchBoxProps) => {
 	return (
 		<div id="searchbox" className={ props.className }>
 			<img src="images/dino.png" />
-			<input type="text" placeholder="Enter a query, then press enter" onKeyPress={ onPress } />
+			<div className="wrapper">
+				<input type="text" placeholder="Enter a query, then press enter" onKeyPress={ onPress } />
+				<div id="loading" className={ props.isLoading ? "on" : "off" }></div>
+			</div>
 		</div>
 	);
 };
@@ -122,11 +126,14 @@ const ResultView = (props: ResultViewProps) => {
 		<li>
 			<div className="header">
 				<span className="title">{ props.title }</span>
-				<span className="price">
-					<span className="value">{ weiToString(props.price) }</span>
-					<span className="wei">wei</span>
+				<span className="buy">
+					<a href="#" onClick={ event => { event.preventDefault(); props.onPurchase(); }}>purchase</a>
+					<span className="price">
+						<span>for </span>
+						<span className="value">{ weiToString(props.price) } </span>
+						<span className="wei">wei</span>
+					</span>
 				</span>
-				<a href="#" onClick={ event => { event.preventDefault(); props.onPurchase(); }}>BUY</a>
 			</div>
 			<div className="description">
 				{ props.description }
@@ -156,6 +163,7 @@ class Main extends React.Component<MainProps, MainState> {
 		return (
 			<main id="main">
 				<SearchBox
+					isLoading={ this.state.results == null }
 					className={ this.state.display === "search" ? "big" : "small" }
 					onQuery={ this.onQuery.bind(this) }/>
 
@@ -165,12 +173,22 @@ class Main extends React.Component<MainProps, MainState> {
 	}
 
 	private onQuery(query: string) {
+		if (this.state.display !== "results") {
+			this.setState({
+				display: "results"
+			});
+		}
+
 		this.props.onQuery(query).then(results => {
 			this.setState({
-				results,
-				display: "results"
-			})
+				results
+			});
 		});
+		/*setTimeout(() => {
+			this.setState({
+				results: RESULTS_MOCK
+			});
+		}, 2500);*/
 	}
 
 	private renderResults(): JSX.Element | null {
@@ -179,7 +197,9 @@ class Main extends React.Component<MainProps, MainState> {
 		}
 
 		if (this.state.results.length === 0) {
-			return <div className="noresults">No results found</div>;
+			return (
+				<div className="noresults">No results found, try something else</div>
+			);
 		}
 
 		const results = this.state.results.map(result => ResultView(Object.assign({}, result, {
