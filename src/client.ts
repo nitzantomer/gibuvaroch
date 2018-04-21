@@ -2,14 +2,15 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import { ContractAdapterInterface } from "./contract-adapter";
 import { getPrivateKey, getPublicKey, queryToBuffer } from "./utils";
-import { QueryResponseEvent } from "./interfaces";
-import { SearchResult, SearchMetadata } from "./search-adapter";
+import { QueryResponseEvent, DataResponseEvent } from "./interfaces";
+import { SearchResult, SearchMetadata, SearchDocument } from "./search-adapter";
 const { NODE_ENV } = process.env;
 const KEY_PATH = NODE_ENV === "test" ? `${__dirname}/../..` : `${__dirname}/../`;
 
 export default class Client {
     adapter: ContractAdapterInterface;
     searchMetadata = new Map<string, SearchMetadata>();
+    documents = new Map<string, SearchDocument>();
 
     constructor(input: { adapter: ContractAdapterInterface }) {
         this.adapter = input.adapter;
@@ -39,12 +40,27 @@ export default class Client {
         this.storeSearchMetadata(event.requestId, { results, prices: event.prices });
     }
 
+    processDataResponseEvent(event: DataResponseEvent) {
+        const { requestId, encryptedData } = event;
+        const document: SearchDocument = JSON.parse(crypto.privateDecrypt(this.getBuyerPrivateKey(), encryptedData).toString());
+
+        this.storeSearchDocument(requestId, document);
+    }
+
     storeSearchMetadata(requestId: string, metadata: SearchMetadata) {
         this.searchMetadata.set(requestId, metadata);
     }
 
     getSearchMetadata(requestId: string): SearchMetadata {
         return this.searchMetadata.get(requestId);
+    }
+
+    storeSearchDocument(requestId: string, document: SearchDocument) {
+        this.documents.set(requestId, document);
+    }
+
+    getSearchDocument(requestId: string): SearchDocument {
+        return this.documents.get(requestId);
     }
 
     async listenToEvents() {
@@ -59,6 +75,21 @@ export default class Client {
                 encryptedResponse: new Buffer(encryptedQueryResults, "hex")
             });
         });
+
+        const dataResponseEvents = await this.adapter.getEvents("LogDataResponse", 0);
+
+        dataResponseEvents.forEach((dataResponseEvent: any) => {
+            const { reqId, encryptedData } = dataResponseEvent.returnValues;
+
+            this.processDataResponseEvent({
+                requestId: reqId,
+                encryptedData: new Buffer(encryptedData, "hex")
+            });
+        });
     }
 
+    dataRequest(requestId: string, index: number) {
+        const price = this.getSearchMetadata(requestId).prices[index];
+        this.adapter.dataRequest(requestId, index, price);
+    }
 }

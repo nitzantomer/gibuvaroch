@@ -8,6 +8,8 @@ export interface ContractAdapterInterface {
     queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer): void;
     getSellerPublicKey(): Promise<RsaPublicKey>;
     getEvents(eventType: string, fromBlock: number): Promise<any>;
+    dataRequest(requestId: string, index: number, price: number): void;
+    dataResponse(requestId: string, encryptedData: Buffer): void;
 }
 export default class ContractAdapter implements ContractAdapterInterface {
     address: string;
@@ -54,5 +56,19 @@ export default class ContractAdapter implements ContractAdapterInterface {
 
     async getEvents(eventType: string, fromBlock: number): Promise<any> {
         return this.contract.getPastEvents(eventType, { fromBlock, toBlock: "latest" });
+    }
+
+    dataRequest(requestId: string, index: number, price: number): void {
+        return this.contract.methods.dataRequest(requestId, index).send({
+            from: this.account.address,
+            value: price
+        });
+    }
+
+    dataResponse(requestId: string, encryptedData: Buffer): void {
+        return this.contract.methods.dataResponse(requestId, encryptedData.toString("hex")).send({
+            from: this.account.address,
+            gas: 10000000000
+        });
     }
 }
