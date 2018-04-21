@@ -11,10 +11,10 @@ contract GibuvAroch is Ownable {
 	mapping (bytes32 => PriceList) private prices;
 	string public publicKey;
 
-	event LogQueryRequest(bytes32 indexed reqId, string buyerPublicKey, string encryptedQuery);
-	event LogQueryResponse(bytes32 indexed reqId, uint[] dataPrices, string encryptedQueryResults);
-	event LogDataRequest(bytes32 indexed reqId, uint index);
-	event LogDataResponse(bytes32 indexed reqId, string encryptedData);
+	event LogQueryRequest(bytes32 reqId, string buyerPublicKey, string encryptedQuery);
+	event LogQueryResponse(bytes32 reqId, uint[] dataPrices, string encryptedQueryResults);
+	event LogDataRequest(bytes32 reqId, uint index);
+	event LogDataResponse(bytes32 reqId, string encryptedData);
 
 	constructor(string _publicKey) public {
         publicKey = _publicKey;
