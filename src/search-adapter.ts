@@ -72,7 +72,7 @@ export default class SearchAdapter implements SearchAdapterInterface {
             if (score > 0) {
                 results.push({
                     id: document.id,
-                    description: matches[0].slice(0, 27) + "...",
+                    description: matches[0].slice(0, 60) + "...",
                     score
                 });
 
