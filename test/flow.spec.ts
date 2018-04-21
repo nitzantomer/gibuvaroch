@@ -50,11 +50,11 @@ describe("General flow", () => {
         describe("query flow", () => {
             let client: Client;
 
-            it("submits a request with encrypted data and public key", () => {
+            it("submits a request with encrypted data and public key", async () => {
                 client = new Client({ adapter });
-                client.queryRequest("Israel independence day 2018");
+                await client.queryRequest("Israel independence day 2018");
 
-                expect(adapter.queryRequest).to.be.called;
+                return expect(adapter.queryRequest).to.be.called;
             });
 
             it("successfully processes search results", () => {

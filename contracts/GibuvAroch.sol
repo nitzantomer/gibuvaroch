@@ -12,13 +12,13 @@ contract GibuvAroch is Ownable {
 
 	bytes32 public constant publicKey = "my public key";
 
-	event LogQueryRequest(bytes32 reqId, bytes32 buyerPublicKey, string encryptedQuery);
+	event LogQueryRequest(bytes32 reqId, string buyerPublicKey, string encryptedQuery);
 	event LogQueryResponse(bytes32 reqId, uint[] dataPrices, string encryptedQueryResults);
 
 	event LogDataRequest(bytes32 reqId, uint index);
 	event LogDataResponse(bytes32 reqId, string encryptedData);
 
-	function queryRequest(bytes32 reqId, bytes32 buyerPublicKey, string encryptedQuery) public {
+	function queryRequest(bytes32 reqId, string buyerPublicKey, string encryptedQuery) public {
 		require(!prices[reqId].exists);
 
 		emit LogQueryRequest(reqId, buyerPublicKey, encryptedQuery);

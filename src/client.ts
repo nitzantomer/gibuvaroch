@@ -4,6 +4,8 @@ import { ContractAdapterInterface } from "./contract-adapter";
 import { getPrivateKey, getPublicKey, queryToBuffer } from "./utils";
 import { QueryResponseEvent } from "./interfaces";
 import { SearchResult } from "./search-adapter";
+const { NODE_ENV } = process.env;
+const KEY_PATH = NODE_ENV === "test" ? `${__dirname}/../..` : `${__dirname}/../`;
 
 export default class Client {
     adapter: ContractAdapterInterface;
@@ -18,18 +20,18 @@ export default class Client {
     }
 
     getBuyerPrivateKey(): crypto.RsaPrivateKey {
-        return getPrivateKey(`${__dirname}/../../temp-keys/buyer/key`);
+        return getPrivateKey(`${KEY_PATH}/temp-keys/buyer/key`);
     }
 
     getBuyerPublicKey(): crypto.RsaPublicKey {
-        return getPublicKey(`${__dirname}/../../temp-keys/buyer/key.pub.pem`);
+        return getPublicKey(`${KEY_PATH}/temp-keys/buyer/key.pub.pem`);
     }
 
-    queryRequest(query: string) {
+    async queryRequest(query: string): Promise<String> {
         const queryAsBuffer = queryToBuffer(query);
         const encryptedQuery = crypto.publicEncrypt(this.getSellerPublicKey(), queryAsBuffer);
 
-        this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
+        return this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
     }
 
     processQueryResponseEvent(event: QueryResponseEvent) {
