@@ -1,25 +1,41 @@
 import * as fs from "fs";
 import { RsaPublicKey } from "crypto";
 const Web3 = require("web3");
-import { getPublicKey } from "./utils";
 
 export interface ContractAdapterInterface {
     queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): Promise<string>;
     queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer): void;
     getSellerPublicKey(): Promise<RsaPublicKey>;
-    getEvents(eventType: string, fromBlock: number): Promise<any>;
+    getEvents(eventType: string, fromBlock: number): Promise<ContractEvent[]>;
     dataRequest(requestId: string, index: number, price: number): void;
     dataResponse(requestId: string, encryptedData: Buffer): void;
 }
+
+export interface ContractEvent {
+    returnValues: any;
+    raw: {
+        data: string;
+        topics: string[];
+    };
+    event: string;
+    signature: string;
+    logIndex: number;
+    transactionIndex: number;
+    transactionHash: string;
+    blockHash: string;
+    blockNumber: number;
+    address: string;
+}
+
 export default class ContractAdapter implements ContractAdapterInterface {
     address: string;
     web3: any;
     contract: any;
     account: any;
 
-    constructor(input: { address: string, ethPrivateKey: string }) {
+    constructor(input: { network: string, address: string, ethPrivateKey: string }) {
         this.address = input.address;
-        this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+		this.web3 = new Web3(new Web3.providers.HttpProvider(input.network));
 
         const jsonInterface = JSON.parse(fs.readFileSync(`${__dirname}/../build/contracts/GibuvAroch.json`).toString()).abi;
         this.contract = new this.web3.eth.Contract(jsonInterface, this.address);
@@ -28,7 +44,13 @@ export default class ContractAdapter implements ContractAdapterInterface {
     }
 
     async getSellerPublicKey(): Promise<RsaPublicKey> {
-        const sellerPublicKey = await this.contract.methods.publicKey().call();
+		function parseKey(input: string): string {
+			return input
+				.replace(/ RSA PUBLIC KEY/g, "-RSA-PUBLIC-KEY")
+				.replace(/ /g, "\n")
+				.replace(/-RSA-PUBLIC-KEY/g, " RSA PUBLIC KEY");
+		}
+		const sellerPublicKey = parseKey(await this.contract.methods.getPublicKey().call())
 
         console.log(`Retrieved seller public key`);
         console.log(sellerPublicKey);
@@ -38,24 +60,22 @@ export default class ContractAdapter implements ContractAdapterInterface {
 
     async queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey): Promise<string> {
         const requestId = Web3.utils.randomHex(32);
-
         this.contract.methods.queryRequest(requestId, buyerPublicKey.key, encryptedQuery.toString("hex")).send({
             from: this.account.address,
-            gas: 10000000000
+            gas: "10000000000"
         });
-
         return requestId;
     }
 
     async queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer) {
         this.contract.methods.queryResponse(requestId, prices, encryptedQueryResults.toString("hex")).send({
             from: this.account.address,
-            gas: 10000000000
+            gas: "10000000000"
         });
     }
 
-    async getEvents(eventType: string, fromBlock: number): Promise<any> {
-        return this.contract.getPastEvents(eventType, { fromBlock, toBlock: "latest" });
+    async getEvents(eventType: string, fromBlock: number): Promise<ContractEvent[]> {
+        return await this.contract.getPastEvents(eventType, { fromBlock, toBlock: "latest" });
     }
 
     dataRequest(requestId: string, index: number, price: number): void {
@@ -68,7 +88,7 @@ export default class ContractAdapter implements ContractAdapterInterface {
     dataResponse(requestId: string, encryptedData: Buffer): void {
         return this.contract.methods.dataResponse(requestId, encryptedData.toString("hex")).send({
             from: this.account.address,
-            gas: 10000000000
+            gas: "10000000000"
         });
     }
 }

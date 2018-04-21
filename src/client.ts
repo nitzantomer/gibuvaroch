@@ -1,9 +1,8 @@
 import * as crypto from "crypto";
-import * as fs from "fs";
 import { ContractAdapterInterface } from "./contract-adapter";
 import { getPrivateKey, getPublicKey, queryToBuffer } from "./utils";
 import { QueryResponseEvent, DataResponseEvent } from "./interfaces";
-import { SearchResult, SearchMetadata, SearchDocument } from "./search-adapter";
+import { SearchMetadata, SearchDocument } from "./search-adapter";
 const { NODE_ENV } = process.env;
 const KEY_PATH = NODE_ENV === "test" ? `${__dirname}/../..` : `${__dirname}/../`;
 
@@ -30,6 +29,7 @@ export default class Client {
 
     async queryRequest(query: string): Promise<string> {
         const queryAsBuffer = queryToBuffer(query);
+
         const encryptedQuery = crypto.publicEncrypt(await this.getSellerPublicKey(), queryAsBuffer);
 
         return this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
@@ -65,27 +65,28 @@ export default class Client {
 
     async listenToEvents() {
         const queryResponseEvents = await this.adapter.getEvents("LogQueryResponse", 0);
-
-        queryResponseEvents.forEach((queryResponseEvent: any) => {
-            const { reqId, dataPrices, encryptedQueryResults } = queryResponseEvent.returnValues;
-
-            this.processQueryResponseEvent({
-                requestId: reqId,
-                prices: dataPrices,
-                encryptedResponse: new Buffer(encryptedQueryResults, "hex")
-            });
-        });
+        await Promise.all(
+            queryResponseEvents.map(queryResponseEvent => {
+                const { reqId, dataPrices, encryptedQueryResults } = queryResponseEvent.returnValues;
+                return this.processQueryResponseEvent({
+                    requestId: reqId,
+                    prices: dataPrices,
+                    encryptedResponse: new Buffer(encryptedQueryResults, "hex")
+                });
+            })
+        );
 
         const dataResponseEvents = await this.adapter.getEvents("LogDataResponse", 0);
+        await Promise.all(
+            dataResponseEvents.map(dataResponseEvent => {
+                const { reqId, encryptedData } = dataResponseEvent.returnValues;
 
-        dataResponseEvents.forEach((dataResponseEvent: any) => {
-            const { reqId, encryptedData } = dataResponseEvent.returnValues;
-
-            this.processDataResponseEvent({
-                requestId: reqId,
-                encryptedData: new Buffer(encryptedData, "hex")
-            });
-        });
+                return this.processDataResponseEvent({
+                    requestId: reqId,
+                    encryptedData: new Buffer(encryptedData, "hex")
+                });
+            })
+        );
     }
 
     dataRequest(requestId: string, index: number) {

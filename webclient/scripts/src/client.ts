@@ -10,16 +10,16 @@ let clientAccount: any;
 export type KeyProvider = () => { privateKey: string, publicKey: string };
 
 export async function init(ethereumHost: string, keyProvider: KeyProvider) {
-	web3 = new Web3(new Web3.providers.HttpProvider(ethereumHost));
-	console.log(web3.version);
+	/*web3 = new Web3(new Web3.providers.HttpProvider(ethereumHost));
+	console.log(web3.version);*/
 	//console.log(web3.eth.accounts);
 	//web3.net.getListening((error, result) => { console.log("HERE: ", result, error, web3.eth.accounts) })
 	// console.log(web3.eth.getBlockNumber());
 
 
-	const Contract = web3.eth.contract(CONTRACT_META.abi);
+	/*const Contract = web3.eth.contract(CONTRACT_META.abi);
 	contract = Contract.at(CONTRACT_META.address);
 
 	console.log(web3.eth.accounts);
-	clientAccount = web3.eth.accounts.privateKeyToAccount(keyProvider());
+	clientAccount = web3.eth.accounts.privateKeyToAccount(keyProvider());*/
 }
