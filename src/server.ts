@@ -4,6 +4,9 @@ import { QueryRequestEvent } from "./interfaces";
 import { ContractAdapterInterface } from "./contract-adapter";
 import { SearchAdapterInterface } from "./search-adapter";
 
+const { NODE_ENV } = process.env;
+const KEY_PATH = NODE_ENV === "test" ? `${__dirname}/../..` : `${__dirname}/../`;
+
 export default class Server {
     contractAdapter: ContractAdapterInterface;
     searchAdapter: SearchAdapterInterface;
@@ -14,19 +17,37 @@ export default class Server {
     }
 
     getSellerPrivateKey(): crypto.RsaPrivateKey {
-        return getPrivateKey(`${__dirname}/../../temp-keys/seller/key`);
+        return getPrivateKey(`${KEY_PATH}/temp-keys/seller/key`);
     }
 
     getSellerPublicKey(): crypto.RsaPublicKey {
-        return getPublicKey(`${__dirname}/../../temp-keys/seller/key.pub.pem`);
+        return getPublicKey(`${KEY_PATH}/temp-keys/seller/key.pub.pem`);
     }
 
     processQueryRequestEvent(event: QueryRequestEvent) {
         const { query } = JSON.parse(crypto.privateDecrypt(this.getSellerPrivateKey(), event.encryptedQuery).toString());
 
+        console.log(`Received query request:`, query);
+
         const searchResults = this.searchAdapter.search(query);
         const encryptedQueryResults = crypto.publicEncrypt(event.buyerPublicKey, resultsToBuffer(searchResults));
 
         this.contractAdapter.queryResponse(event.requestId, encryptedQueryResults);
+    }
+
+    async listenToEvents() {
+        const queryRequestEvents = await this.contractAdapter.getQueryRequestEvents(0);
+
+        queryRequestEvents.forEach((queryRequestEvent: any) => {
+            console.log(queryRequestEvent);
+
+            const { reqId, buyerPublicKey, encryptedQuery} = queryRequestEvent.returnValues;
+
+            this.processQueryRequestEvent({
+                requestId: reqId,
+                buyerPublicKey,
+                encryptedQuery: new Buffer(encryptedQuery, "hex")
+            });
+        });
     }
 }

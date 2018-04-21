@@ -13,4 +13,13 @@ if (MODE == "--client") {
         console.log(`RequestId: ${requestId}`);
     })().then(console.log, console.error);
 
+} else if (MODE == "--server") {
+    const server = new Server({
+        searchAdapter: undefined,
+        contractAdapter: new ContractAdapter({ address: CONTRACT_ADDRESS, ethPrivateKey: ETH_PRIVATE_KEY })
+    });
+
+    (async () => {
+        await server.listenToEvents();
+    })();
 }

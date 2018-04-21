@@ -7,7 +7,7 @@ export interface ContractAdapterInterface {
     queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): Promise<String>;
     queryResponse(requestId: string, encryptedQueryResults: Buffer): void;
     getSellerPublicKey(): RsaPublicKey;
-    test(): Promise<void>;
+    getQueryRequestEvents(fromBlock: number): Promise<any>;
 }
 export default class ContractAdapter implements ContractAdapterInterface {
     address: string;
@@ -23,11 +23,6 @@ export default class ContractAdapter implements ContractAdapterInterface {
         this.contract = new this.web3.eth.Contract(jsonInterface, this.address);
 
         this.account = this.web3.eth.accounts.privateKeyToAccount(input.ethPrivateKey);
-    }
-
-    async test() {
-        console.log(this.contract);
-        console.log(await this.contract.methods.publicKey().call());
     }
 
     // TODO: replace with a real call
@@ -48,5 +43,9 @@ export default class ContractAdapter implements ContractAdapterInterface {
 
     queryResponse(requestId: string, encryptedQueryResults: Buffer) {
         throw new Error(`Not implemented`);
+    }
+
+    async getQueryRequestEvents(fromBlock: number): Promise<any> {
+        return this.contract.getPastEvents("allEvents", {fromBlock: 0, toBlock: "latest"});
     }
 }
