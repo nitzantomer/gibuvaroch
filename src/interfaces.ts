@@ -8,5 +8,6 @@ export interface QueryRequestEvent {
 
 export interface QueryResponseEvent {
     requestId: string;
+    prices: number[];
     encryptedResponse: Buffer;
 }

@@ -6,8 +6,13 @@ export interface SearchResult {
     score: number;
 }
 
+export interface SearchMetadata {
+    results: SearchResult[];
+    prices: number[];
+}
+
 export interface SearchAdapterInterface {
-    search(query: string): SearchResult[];
+    search(query: string): SearchMetadata;
 }
 
 export default class SearchAdapter implements SearchAdapterInterface {
@@ -15,7 +20,7 @@ export default class SearchAdapter implements SearchAdapterInterface {
         return ;
     }
 
-    search(query: string): SearchResult[] {
+    search(query: string): SearchMetadata {
         const documents = [
             "some lame stuff",
             "maybe query results",
@@ -23,6 +28,10 @@ export default class SearchAdapter implements SearchAdapterInterface {
         ];
 
         const results: SearchResult[] = [];
+        const prices: number[] = [];
+
+        // FIXME: garbage implementation
+        let i = 0;
 
         for (const document of documents) {
             let score = 0;
@@ -39,9 +48,11 @@ export default class SearchAdapter implements SearchAdapterInterface {
                     description: document.slice(0, 10),
                     score
                 });
+
+                prices.push(++i * 10);
             }
         }
 
-        return results;
+        return { results, prices };
     }
 }

@@ -58,7 +58,7 @@ describe("General flow", () => {
             });
 
             it("successfully processes search results", () => {
-                const searchResults: SearchResult[] = [
+                const results: SearchResult[] = [
                     {
                         id: 0,
                         description: "State holidays in Israel 2018",
@@ -66,13 +66,16 @@ describe("General flow", () => {
                     }
                 ];
 
+                const prices = [ 10 ];
+
                 const event: QueryResponseEvent = {
                     requestId: "test-request-id",
-                    encryptedResponse: crypto.publicEncrypt(buyerPublicKey, resultsToBuffer(searchResults))
+                    prices,
+                    encryptedResponse: crypto.publicEncrypt(buyerPublicKey, resultsToBuffer(results))
                 };
 
                 client.processQueryResponseEvent(event);
-                expect(client.getRequestResults("test-request-id")).to.be.eql(searchResults);
+                expect(client.getSearchMetadata("test-request-id")).to.be.eql({ results, prices });
             });
         });
     });
@@ -108,7 +111,7 @@ describe("General flow", () => {
                     encryptedQuery: crypto.publicEncrypt(sellerPublicKey, queryToBuffer("Israel independence day 2018"))
                 };
 
-                const searchResults: SearchResult[] = [
+                const results: SearchResult[] = [
                     {
                         id: 0,
                         description: "State holidays in Israel, 2018",
@@ -120,7 +123,10 @@ describe("General flow", () => {
                         score: 5
                     }
                 ];
-                (<sinon.SinonStub>searchAdapter.search).returns(searchResults);
+
+                const prices = [20, 10];
+
+                (<sinon.SinonStub>searchAdapter.search).returns({ results, prices });
 
                 server.processQueryRequestEvent(event);
                 expect(searchAdapter.search).to.be.calledWith("Israel independence day 2018");
@@ -130,8 +136,10 @@ describe("General flow", () => {
 
                 expect(queryResponse.args[0]).to.be.eql("test-request-id");
 
-                const decryptedSearchResults = JSON.parse(crypto.privateDecrypt(buyerPrivateKey, queryResponse.args[1]).toString());
-                expect(decryptedSearchResults).to.be.eql({ results: searchResults });
+                expect(queryResponse.args[1]).to.be.eql(prices);
+
+                const decryptedSearchResults = JSON.parse(crypto.privateDecrypt(buyerPrivateKey, queryResponse.args[2]).toString());
+                expect(decryptedSearchResults).to.be.eql({ results: results });
             });
         });
     });

@@ -4,10 +4,10 @@ const Web3 = require("web3");
 import { getPublicKey } from "./utils";
 
 export interface ContractAdapterInterface {
-    queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): Promise<String>;
-    queryResponse(requestId: string, encryptedQueryResults: Buffer): void;
+    queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): Promise<string>;
+    queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer): void;
     getSellerPublicKey(): RsaPublicKey;
-    getQueryRequestEvents(fromBlock: number): Promise<any>;
+    getEvents(eventType: string, fromBlock: number): Promise<any>;
 }
 export default class ContractAdapter implements ContractAdapterInterface {
     address: string;
@@ -30,7 +30,7 @@ export default class ContractAdapter implements ContractAdapterInterface {
         return getPublicKey(`${__dirname}/../temp-keys/seller/key.pub.pem`);
     }
 
-    async queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey): Promise<String> {
+    async queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey): Promise<string> {
         const requestId = Web3.utils.randomHex(32);
 
         this.contract.methods.queryRequest(requestId, buyerPublicKey.key, encryptedQuery.toString("hex")).send({
@@ -41,11 +41,14 @@ export default class ContractAdapter implements ContractAdapterInterface {
         return requestId;
     }
 
-    queryResponse(requestId: string, encryptedQueryResults: Buffer) {
-        throw new Error(`Not implemented`);
+    async queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer) {
+        this.contract.methods.queryResponse(requestId, prices, encryptedQueryResults.toString("hex")).send({
+            from: this.account.address,
+            gas: 10000000000
+        });
     }
 
-    async getQueryRequestEvents(fromBlock: number): Promise<any> {
-        return this.contract.getPastEvents("allEvents", {fromBlock: 0, toBlock: "latest"});
+    async getEvents(eventType: string, fromBlock: number): Promise<any> {
+        return this.contract.getPastEvents(eventType, { fromBlock, toBlock: "latest" });
     }
 }
