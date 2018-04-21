@@ -15,9 +15,16 @@ if (MODE == "--client") {
 
         await client.listenToEvents();
 
+        console.log("SEARCH METADATA");
         for (const id of client.searchMetadata.keys()) {
             console.log(id);
             console.log(client.getSearchMetadata(id));
+        }
+
+        console.log("SEARCH DOCUMENTS");
+        for (const id of client.documents.keys()) {
+            console.log(id);
+            console.log(client.getSearchDocument(id));
         }
 
         if (!id && !index) {

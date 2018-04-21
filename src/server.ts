@@ -73,7 +73,9 @@ export default class Server {
         const documentId = metadata.results[index].id;
         const document = this.searchAdapter.getDocument(documentId);
 
-        crypto.publicEncrypt(buyerPublicKey, new Buffer(JSON.stringify(document)));
+        const data = crypto.publicEncrypt(buyerPublicKey, new Buffer(JSON.stringify(document)));
+
+        this.contractAdapter.dataResponse(requestId, data);
     }
 
     async listenToEvents() {

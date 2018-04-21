@@ -16,3 +16,8 @@ export interface DataRequestEvent {
     requestId: string;
     index: number;
 }
+
+export interface DataResponseEvent {
+    requestId: string;
+    encryptedData: Buffer;
+}
