@@ -50,7 +50,7 @@ export default class Server {
         return parseInt(await this.storage.get("lastBlock") || "0");
     }
     async setLastBlock(block: number) {
-         await this.storage.set("lastBlock", block);
+         await this.storage.set("lastBlock", block || 0);
     }
 
     async processQueryRequestEvent(event: QueryRequestEvent) {
@@ -90,7 +90,7 @@ export default class Server {
     async listenToEvents() {
         const lastBlock = await this.getLastBlock();
         let newLastBlock = lastBlock;
-        const queryRequestEvents = await this.contractAdapter.getEvents("LogQueryRequest", lastBlock + 1 );
+        const  queryRequestEvents = await this.contractAdapter.getEvents("LogQueryRequest", lastBlock + 1);
 
         Promise.all(
             queryRequestEvents.map(async queryRequestEvent => {
@@ -105,7 +105,6 @@ export default class Server {
         );
 
         const dataRequestEvents = await this.contractAdapter.getEvents("LogDataRequest", lastBlock + 1 );
-
         Promise.all(
             dataRequestEvents.map(dataRequestEvent => {
                 const { reqId, index} = dataRequestEvent.returnValues;

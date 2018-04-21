@@ -17,8 +17,9 @@ if (MODE == "--client") {
         await client.listenToEvents();
 
         if (step == "1") {  // queryRequest
-            const requestId = await client.queryRequest(first || "some query");
-            console.log(`RequestId: ${requestId} for query: ${first}`);
+            const query = first || "some query";
+            const requestId = await client.queryRequest(query);
+            console.log(`RequestId: ${requestId} for query: ${query}`);
         }
 
         if (step == "2") { // queryResponse

@@ -50,8 +50,6 @@ export default class ContractAdapter implements ContractAdapterInterface {
 				.replace(/ /g, "\n")
 				.replace(/-RSA-PUBLIC-KEY/g, " RSA PUBLIC KEY");
 		}
-		console.log(await this.contract.methods.getPublicKey());
-
 		const sellerPublicKey = parseKey(await this.contract.methods.getPublicKey().call())
 
         console.log(`Retrieved seller public key`);
@@ -62,24 +60,22 @@ export default class ContractAdapter implements ContractAdapterInterface {
 
     async queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey): Promise<string> {
         const requestId = Web3.utils.randomHex(32);
-
-        await this.contract.methods.queryRequest(requestId, buyerPublicKey.key, encryptedQuery.toString("hex")).send({
+        this.contract.methods.queryRequest(requestId, buyerPublicKey.key, encryptedQuery.toString("hex")).send({
             from: this.account.address,
-            gas: 10000000000
+            gas: "10000000000"
         });
-
         return requestId;
     }
 
     async queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer) {
-        await this.contract.methods.queryResponse(requestId, prices, encryptedQueryResults.toString("hex")).send({
+        this.contract.methods.queryResponse(requestId, prices, encryptedQueryResults.toString("hex")).send({
             from: this.account.address,
-            gas: 10000000000
+            gas: "10000000000"
         });
     }
 
     async getEvents(eventType: string, fromBlock: number): Promise<ContractEvent[]> {
-        return this.contract.getPastEvents(eventType, { fromBlock, toBlock: "latest" });
+        return await this.contract.getPastEvents(eventType, { fromBlock, toBlock: "latest" });
     }
 
     dataRequest(requestId: string, index: number, price: number): void {
@@ -92,7 +88,7 @@ export default class ContractAdapter implements ContractAdapterInterface {
     dataResponse(requestId: string, encryptedData: Buffer): void {
         return this.contract.methods.dataResponse(requestId, encryptedData.toString("hex")).send({
             from: this.account.address,
-            gas: 10000000000
+            gas: "10000000000"
         });
     }
 }

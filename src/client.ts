@@ -65,27 +65,29 @@ export default class Client {
 
     async listenToEvents() {
         const queryResponseEvents = await this.adapter.getEvents("LogQueryResponse", 0);
+        Promise.all(
+            queryResponseEvents.map(queryResponseEvent => {
+                const { reqId, dataPrices, encryptedQueryResults } = queryResponseEvent.returnValues;
 
-        queryResponseEvents.forEach(queryResponseEvent => {
-            const { reqId, dataPrices, encryptedQueryResults } = queryResponseEvent.returnValues;
-
-            this.processQueryResponseEvent({
-                requestId: reqId,
-                prices: dataPrices,
-                encryptedResponse: new Buffer(encryptedQueryResults, "hex")
-            });
-        });
+                return this.processQueryResponseEvent({
+                    requestId: reqId,
+                    prices: dataPrices,
+                    encryptedResponse: new Buffer(encryptedQueryResults, "hex")
+                });
+            })
+        );
 
         const dataResponseEvents = await this.adapter.getEvents("LogDataResponse", 0);
+        Promise.all(
+            dataResponseEvents.map(dataResponseEvent => {
+                const { reqId, encryptedData } = dataResponseEvent.returnValues;
 
-        dataResponseEvents.forEach(dataResponseEvent => {
-            const { reqId, encryptedData } = dataResponseEvent.returnValues;
-
-            this.processDataResponseEvent({
-                requestId: reqId,
-                encryptedData: new Buffer(encryptedData, "hex")
-            });
-        });
+                return this.processDataResponseEvent({
+                    requestId: reqId,
+                    encryptedData: new Buffer(encryptedData, "hex")
+                });
+            })
+        );
     }
 
     dataRequest(requestId: string, index: number) {
