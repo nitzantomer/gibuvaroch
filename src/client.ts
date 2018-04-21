@@ -15,7 +15,7 @@ export default class Client {
         this.adapter = input.adapter;
     }
 
-    getSellerPublicKey(): crypto.RsaPublicKey {
+    async getSellerPublicKey(): Promise<crypto.RsaPublicKey> {
         return this.adapter.getSellerPublicKey();
     }
 
@@ -29,7 +29,7 @@ export default class Client {
 
     async queryRequest(query: string): Promise<string> {
         const queryAsBuffer = queryToBuffer(query);
-        const encryptedQuery = crypto.publicEncrypt(this.getSellerPublicKey(), queryAsBuffer);
+        const encryptedQuery = crypto.publicEncrypt(await this.getSellerPublicKey(), queryAsBuffer);
 
         return this.adapter.queryRequest(encryptedQuery, this.getBuyerPublicKey());
     }

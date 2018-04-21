@@ -6,7 +6,7 @@ import { getPublicKey } from "./utils";
 export interface ContractAdapterInterface {
     queryRequest(query: Buffer, buyerPublicKey: RsaPublicKey): Promise<string>;
     queryResponse(requestId: string, prices: number[], encryptedQueryResults: Buffer): void;
-    getSellerPublicKey(): RsaPublicKey;
+    getSellerPublicKey(): Promise<RsaPublicKey>;
     getEvents(eventType: string, fromBlock: number): Promise<any>;
 }
 export default class ContractAdapter implements ContractAdapterInterface {
@@ -25,9 +25,13 @@ export default class ContractAdapter implements ContractAdapterInterface {
         this.account = this.web3.eth.accounts.privateKeyToAccount(input.ethPrivateKey);
     }
 
-    // TODO: replace with a real call
-    getSellerPublicKey(): RsaPublicKey {
-        return getPublicKey(`${__dirname}/../temp-keys/seller/key.pub.pem`);
+    async getSellerPublicKey(): Promise<RsaPublicKey> {
+        const sellerPublicKey = await this.contract.methods.publicKey().call();
+
+        console.log(`Retrieved seller public key`);
+        console.log(sellerPublicKey);
+
+        return { key: sellerPublicKey };
     }
 
     async queryRequest(encryptedQuery: Buffer, buyerPublicKey: RsaPublicKey): Promise<string> {
