@@ -16,7 +16,7 @@ contract GibuvAroch is Ownable {
 	event LogDataRequest(bytes32 reqId, uint index);
 	event LogDataResponse(bytes32 reqId, string encryptedData);
 
-    function GibuvAroch(string _publicKey) public {
+	constructor(string _publicKey) public {
         publicKey = _publicKey;
     }
 
