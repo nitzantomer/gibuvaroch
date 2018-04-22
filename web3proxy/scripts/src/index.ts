@@ -20,6 +20,7 @@ APP.use((req: Request, res, next: NextFunction) => {
 	next();
 });
 
+APP.use(express.static("../../../webclient"));
 initServices(APP);
 
 // catch 404
