@@ -61,8 +61,12 @@ export default class SearchAdapter implements SearchAdapterInterface {
             const matches: string[] = [];
 
             for (const term of query.split(/\W/)) {
+                if (term.length <= 3) {
+                    continue;
+                }
+
                 document.contents.split("\n").forEach(line => {
-                    if (_.includes(line, term)) {
+                    if (_.includes(line.toLowerCase(), term.toLowerCase())) {
                         score += 1;
                         matches.push(line);
                     }
