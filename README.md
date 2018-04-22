@@ -15,3 +15,17 @@ npm run test
 npm run start-node
 npm run contract-test
 ```
+
+## running server
+CONTRACT_ADDRESS=<address> ETH_PRIVATE_KEY=<key> NETWORK="http://localhost:8545" node dist/index.js --server
+
+## running client
+```
+./node_modules/.bin/tsc -p webclient/scripts/
+./node_modules/.bin/tsc -p web3proxy/scripts/
+mkdir -p webclient/styles/bin
+./node_modules/.bin/stylus -o webclient/styles/bin webclient/styles/src
+```
+
+## running test client
+CONTRACT_ADDRESS=<address> ETH_PRIVATE_KEY=<key> NETWORK="http://localhost:8545" node dist/index.js --client <step> <first> <second>
