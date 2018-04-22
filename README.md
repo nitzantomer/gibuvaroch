@@ -1,6 +1,6 @@
 # gibuvaroch
 
-A hackathon project by Doody Parizada, Nitzan Tomer and Kirill Maximov.
+A hackathon project by Doody Parizada, Nitzan Tomer and Kirill Maksimov.
 Created during the LongHash Hackathon Tokyo 2018.
 
 ## Demo
