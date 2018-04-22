@@ -1,5 +1,5 @@
 import { init as initView, SearchResult } from "./view";
-import { init as initClient, Client } from "./client";
+import { init as initClient, Client, PurchasedData } from "./client";
 
 const ENCRYPTION_PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----\n" +
 	"MIIJKAIBAAKCAgEAr4NNJBoosVehYFwEzia84jzQKLjXrcBD8wMTRuxVFPCr6n6E\n" +
@@ -81,7 +81,7 @@ async function search(query: string): Promise<SearchResult[]> {
 			return response.results.map((result, index) => {
 				const item = Object.assign({}, result, {
 					price: Number(response.prices[index]),
-					title: `Result ${ index }`
+					title: result.id // `Result ${ index }`
 				});
 
 				currentSearchResults.set(item.id, Object.assign({}, item, { index }));
@@ -99,7 +99,7 @@ async function search(query: string): Promise<SearchResult[]> {
 	return [];
 }
 
-async function purchase(itemId: string): Promise<void> {
+async function purchase(itemId: string): Promise<PurchasedData> {
 	const item = currentSearchResults.get(itemId);
 	await client.dataRequest(currentSearchId, item.index, item.price);
 
@@ -107,8 +107,7 @@ async function purchase(itemId: string): Promise<void> {
 	while (counter > 0) {
 		const response = await client.dataResponse(currentSearchId);
 		if (response) {
-			console.log("YAY!!!! item: ", response);
-			return;
+			return response;
 		}
 
 		counter--;
@@ -116,11 +115,13 @@ async function purchase(itemId: string): Promise<void> {
 			setTimeout(resolve, 1000);
 		});
 	}
+
+	return null;
 }
 
 initView(search, purchase);
 initClient("http://localhost:4321", "http://54.173.39.87", () => ({
 	encryptionPrivateKey: ENCRYPTION_PRIVATE_KEY,
 	encryptionPublicKey: ENCRYPTION_PUBLIC_KEY,
-	ethereumPrivateKey: "0x0787adf5fd751ce74f371b22a36ad082f1ddfec96e9cd13e257c67e29c3c6a22"
+	ethereumPrivateKey: "0xd119abb2cf880f7ba0a53cbe4f118e61eef19702251aacca1719bbb0cb6a7ce6"
 })).then(c => client = c);

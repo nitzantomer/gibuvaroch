@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+import { PurchasedData } from "./client";
+
 export type SearchResult = {
 	id: string;
 	title: string;
@@ -143,14 +145,18 @@ const ResultView = (props: ResultViewProps) => {
 };
 
 type MainProps = {
+	onPurchase: (id: string) => Promise<PurchasedData>;
 	onQuery: (query: string) => Promise<SearchResult[]>;
-	onPurchase: (id: string) => Promise<void>;
 };
 type MainState = {
 	display: "search" | "results";
 	results?: SearchResult[];
+	purchasedData?: PurchasedData;
+	showPurchasedDataAnimationEnded?: boolean;
 };
 class Main extends React.Component<MainProps, MainState> {
+	private textarea: HTMLTextAreaElement;
+
 	constructor(props: MainProps) {
 		super(props);
 
@@ -168,6 +174,7 @@ class Main extends React.Component<MainProps, MainState> {
 					onQuery={ this.onQuery.bind(this) }/>
 
 				{ this.renderResults() }
+				{ this.renderPurchasedData() }
 			</main>
 		);
 	}
@@ -175,7 +182,12 @@ class Main extends React.Component<MainProps, MainState> {
 	private onQuery(query: string) {
 		if (this.state.display !== "results") {
 			this.setState({
+				results: null,
 				display: "results"
+			});
+		} else {
+			this.setState({
+				results: null
 			});
 		}
 
@@ -204,14 +216,56 @@ class Main extends React.Component<MainProps, MainState> {
 
 		const results = this.state.results.map(result => ResultView(Object.assign({}, result, {
 			onPurchase: () => {
-				this.props.onPurchase(result.id);
+				this.props.onPurchase(result.id).then(data => {
+					this.setState({
+						purchasedData: data
+					});
+				});
 			}
 		})));
 
 		return <ol id="results">{ results }</ol>;
 	}
+
+	private renderPurchasedData() {
+		if (!this.state.purchasedData) {
+			return null;
+		}
+
+		const className = this.state.showPurchasedDataAnimationEnded ? "done" : "";
+
+		return (
+			<div id="purchasedata" ref={ el => el && el.addEventListener("animationend", () => this.setState({ showPurchasedDataAnimationEnded: true }))} className={ className }>
+				<div className="header">
+					Here's the data for <span className="title">{ this.state.purchasedData.id }</span>:
+				</div>
+				<textarea ref={ el => this.textarea = el }>{ this.state.purchasedData.contents }</textarea>
+				<ul className="actions">
+					<li>You paid { this.state.purchasedData.price } wei</li>
+					<li><a href="#" onClick={ this.closeDialog.bind(this) } style={ { paddingLeft: "10px" } }>close</a></li>
+					<li><a href="#" onClick={ this.copyToClipboard.bind(this) }>copy to clipboard</a></li>
+				</ul>
+			</div>
+		);
+	}
+
+	private copyToClipboard(event: React.MouseEvent<any>) {
+		event.preventDefault();
+
+		this.textarea.select();
+		document.execCommand("copy");
+		window.getSelection().removeAllRanges();
+	}
+
+	private closeDialog(event: React.MouseEvent<any>) {
+		event.preventDefault();
+		this.setState({
+			purchasedData: null,
+			showPurchasedDataAnimationEnded: false
+		});
+	}
 }
 
-export function init(queryHandler: (query: string) => Promise<SearchResult[]>, purchaseHandler: (id: string) => Promise<void>) {
+export function init(queryHandler: (query: string) => Promise<SearchResult[]>, purchaseHandler: (id: string) => Promise<PurchasedData>) {
 	ReactDOM.render(<Main onQuery={ queryHandler } onPurchase={ purchaseHandler }/>, document.getElementById("reactroot"));
 }
