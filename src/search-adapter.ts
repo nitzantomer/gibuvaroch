@@ -40,7 +40,7 @@ function getDecryptedDocuments(): SearchDocument[] {
     return fs.readdirSync(ENCRYPTED_DOCUMENT_PATH).map((documentName: string, idx: number) => {
         return {
             id: documentName,
-            contents: decryptDocument(documentName),
+            contents: decryptDocument(documentName).slice(0, 253) + "...",
             price: (idx + 1) * 10
         };
     });
